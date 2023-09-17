@@ -1,11 +1,14 @@
 package org.example;
-import org.example.entities.User;
+import org.example.entities.*;
 import org.example.utils.HibernateUtil;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -17,8 +20,10 @@ public class Main {
         Scanner in = new Scanner(System.in);
         do {
             System.out.println("0.Вихід");
-            System.out.println("1.Додати");
+            System.out.println("1.Додати user");
             System.out.println("2.Показати");
+            System.out.println("2.add product");
+            System.out.println("2.add question");
             System.out.print("->_");
             action = Integer.parseInt(in.nextLine());
             switch(action) {
@@ -27,6 +32,14 @@ public class Main {
                     break;
                 case 2: {
                     showUsers();
+                    break;
+                }
+                case 3: {
+                    insertProduct();
+                    break;
+                }
+                case 4: {
+                    insertQuestion();
                     break;
                 }
             }
@@ -92,4 +105,61 @@ public class Main {
             tx.commit();
         }
     }
+        public  static void insertProduct() {
+            Scanner in = new Scanner(System.in);
+            // Get the Hibernate SessionFactory
+            SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+            // Open a Hibernate Session
+            try (Session session = sessionFactory.openSession()) {
+                Transaction tx = session.beginTransaction();
+
+                Product product = new Product();
+                System.out.println("Enter the product name:");
+                String name = in.nextLine();
+                product.setName(name);
+
+                System.out.println("Enter the product description:");
+                String description = in.nextLine();
+                product.setDescription(description);
+
+                System.out.println("Enter the product creation date (YYYY-MM-DD):");
+                String dateString = in.nextLine();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    Date dateCreated = dateFormat.parse(dateString);
+                    product.setDateCreated(dateCreated);
+                } catch (ParseException e) {
+                    System.out.println("Invalid date format. Please enter the date in YYYY-MM-DD format.");
+                    tx.rollback();
+                    return;
+                }
+                session.save(product);
+                tx.commit();
+            }
+    }
+    public static void insertQuestion() {
+        Scanner in = new Scanner(System.in);
+        // Get the Hibernate SessionFactory
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        // Open a Hibernate Session
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            Question question = new Question();
+
+            System.out.println("Enter the question text:");
+            String text = in.nextLine();
+            question.setText(text);
+
+            System.out.println("Enter the question type:");
+            String questionType = in.nextLine();
+            question.setQuestionType(questionType);
+
+            session.save(question);
+            tx.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
